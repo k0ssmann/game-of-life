@@ -42,12 +42,12 @@ GameOfLife.prototype = {
         /* draw vertical lines */
         for(var x = 0; x <= this.cfg.columns; x++) {
             this.ctx.moveTo(0.5 + x * this.res, 0);
-            this.ctx.lineTo(0.5 + x * this.res, this.canvas.width);
+            this.ctx.lineTo(0.5 + x * this.res, this.canvas.height);
         }
         /* draw horizontal lines */
         for(var y = 0; y <= this.cfg.rows; y++) {
             this.ctx.moveTo(0, 0.5 + y * this.res);
-            this.ctx.lineTo(this.canvas.height, 0.5 + y * this.res);
+            this.ctx.lineTo(this.canvas.width, 0.5 + y * this.res);
         }
         this.ctx.stroke();
 
@@ -288,16 +288,28 @@ GameOfLife.prototype = {
             }
         }
 
-
-        
-
-
     return  nNeighbors;
 
+    },
+
+    random: function() {
+        var keys = Object.keys(this.state);
+        var min = 0;
+        var max = 2;
+        for(var x = 0; x < this.cfg.columns; x++) {
+            for(var y = 0; y < this.cfg.rows; y++) {
+                this.grid[x][y] = this.state[keys[Math.floor(Math.random() * (max - min +1)) + min]];
+            }
+        }
+        this.draw();
     }
 }
 
 function onClick(e) {
+    /*
+    *   Add cells by clicking on grid
+    */
+
     var x = Math.floor(e.offsetX/game.res);
     var y = Math.floor(e.offsetY/game.res);
 
@@ -312,24 +324,22 @@ function onClick(e) {
     game.draw();
 }
 
-var game = new GameOfLife(document.getElementById("canvas"), 10);
-game.canvas.addEventListener('click', onClick);
-
-// game.canvas.addEventListener('contextmenu', function(e) {
-//     var x = Math.floor(e.offsetX/game.res);
-//     var y = Math.floor(e.offsetY/game.res);
-
-//     console.log(game.countNeighbours(x,y));
-//     return false;
-// })
-
+var game = new GameOfLife(document.getElementById("canvas"), 5);
+const updateRate = 10;
 var timer;
+
+game.canvas.addEventListener('click', onClick); /* Add cells by clicking on grid */
+document.getElementById("bStart").addEventListener('click', function() {
+    timer = window.setInterval(() => game.update(), updateRate)
+}); /* Start game, set update rate */
+document.getElementById("bStep").addEventListener('click', () => game.update()) /* Update game for one step */
+document.getElementById("bStop").addEventListener('click', () => window.clearInterval(timer)); /* Stop game */
 document.getElementById("bClear").addEventListener('click', function() {
     game.clear();
-    window.clearInterval(timer)});
-document.getElementById("bStep").addEventListener('click', () => game.update())
-document.getElementById("bStart").addEventListener('click', function() {
-    timer = window.setInterval(() => game.update(), 30)
-});
-document.getElementById("bStop").addEventListener('click', () => window.clearInterval(timer));
+    window.clearInterval(timer)}); /* Clear grid */
+document.getElementById("bRandom").addEventListener('click', () => {game.clear(), window.clearInterval(timer), game.random()}); /* Fill grid randomly */
+
+
+
+
 
